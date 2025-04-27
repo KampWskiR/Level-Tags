@@ -3,82 +3,55 @@
 #include <Geode/ui/LoadingSpinner.hpp>
 #include <Geode/modify/LevelSearchLayer.hpp>
 #include <Geode/modify/MenuLayer.hpp>
+#include <Geode/ui/GeodeUI.hpp>
 
-#include "tagDesc.hpp"
-#include "levelCell.cpp"
-#include "levelInfoLayer.cpp"
-#include "betaSearch.hpp"
-#include "tagInfo.hpp"
+#include "layers/tagDesc.hpp"
+#include "hooks/levelCell.cpp"
+#include "hooks/levelInfoLayer.cpp"
+#include "layers/betaSearch.hpp"
+// #include "layers/tagsSearch.hpp"
+#include "tagsManager.hpp"
 
 using namespace geode::prelude;
+
+class $modify(TagsMenuLayer, MenuLayer) {
+    struct Fields {EventListener<web::WebTask> m_listener;};
+    $override
+    bool init() {
+        if (!MenuLayer::init()) return false;
+        if (!TagsManager::sharedState()->tags.size() == 0) return true;
+
+        m_fields->m_listener.bind([this](web::WebTask::Event* e) {
+            if (auto res = e->getValue(); res && res->ok()) {
+                auto jsonStr = res->string().unwrapOr("{}");
+                auto json = matjson::parse(jsonStr).unwrapOr("{}");
+                TagsManager::sharedState()->tags = json;
+            }
+        });
+
+        auto req = web::WebRequest();
+        m_fields->m_listener.setFilter(req.get(fmt::format("https://raw.githubusercontent.com/KampWskiR/test3/main/tagList.json")));
+
+        return true;
+    };
+};
 
 class $modify(TagsLevelSearchLayer, LevelSearchLayer) {
     $override
     bool init(int p0) {
         if (!LevelSearchLayer::init(p0)) return false;
-        if (!Mod::get()->getSettingValue<bool>("beta-search")) return true;
 
         if (auto menu = this->getChildByID("other-filter-menu")) {
-            auto searchBtn = CCMenuItemSpriteExtra::create(
-                CircleButtonSprite::createWithSprite("icon.png"_spr, 1.2, CircleBaseColor::DarkPurple), this, menu_selector(TagsLevelSearchLayer::menu)
-            );
+            auto searchSpr = CircleButtonSprite::createWithSprite("search.png"_spr, 1, CircleBaseColor::DarkPurple);
+            searchSpr->setScale(0.8);
+            auto searchBtn = CCMenuItemSpriteExtra::create(searchSpr, this, menu_selector(TagsLevelSearchLayer::menu));
             menu->addChild(searchBtn);
             menu->updateLayout();
         }
 
         return true;
     };
-    void menu(CCObject* sender) {BetaSearch::create("")->show();}
+    void menu(CCObject* sender) {
+        BetaSearch::create("")->show();
+    }
 };
-
-// class $modify(TagsMenuLayer, MenuLayer) {
-//     struct Fields {
-//         EventListener<web::WebTask> m_listener;
-//     };
-//     $override
-//     bool init() {
-//         if (!MenuLayer::init()) return false;
-
-//         if (!ModManager::sharedState()->authorized && Mod::get()->hasSavedValue("modKey")) {
-//             std::string key = Mod::get()->getSavedValue<std::string>("modKey");
-
-//             ModManager::sharedState()->logout();
-
-//             m_fields->m_listener.bind([this, key](web::WebTask::Event* e) {
-//                 if (auto res = e->getValue(); res && res->ok()) {
-//                     auto jsonStr = res->string().unwrapOr("{}");
-
-//                     ModManager::sharedState()->uiUnlocked = true;
-
-//                     if (jsonStr == "1" || jsonStr == "2" || jsonStr == "3" || jsonStr == "4") {
-//                         ModManager::sharedState()->login(key, std::stoi(jsonStr));
-//                         Notification::create("Successfully Authorized to Level Tags", NotificationIcon::Success, 1)->show();
-//                     } else {
-//                         Notification::create("Failed to Authorize", NotificationIcon::Error, 1)->show();
-//                     }
-//                 }
-//             });
-//             auto req = web::WebRequest();
-//             req.param("action", "login");
-//             req.param("i", GJAccountManager::sharedState()->m_accountID);
-//             req.param("n", GJAccountManager::sharedState()->m_username);
-//             req.param("k", key);
-//             m_fields->m_listener.setFilter(req.get(""));
-//         }
-
-//         auto menu = this->getChildByID("bottom-menu");
-//         auto request = CCMenuItemSpriteExtra::create(CircleButtonSprite::createWithSprite("icon.png"_spr, 1.2, CircleBaseColor::DarkPurple), this, menu_selector(TagsMenuLayer::btn));
-//         request->setID("tag-request");
-//         menu->addChild(request);
-//         menu->updateLayout();
-
-//         return true;
-//     };
-//     void btn(CCObject* sender) {
-//         if (!Mod::get()->getSavedValue<std::string>("modKey").empty()) {
-//             ModTools::create(1)->show();
-//         } else {
-//             ModTools::create(0)->show();
-//         }
-//     }
-// };

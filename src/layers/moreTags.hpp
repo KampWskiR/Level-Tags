@@ -2,7 +2,8 @@
 
 #include <Geode/Geode.hpp>
 #include <Geode/utils/web.hpp>
-#include "tagsManager.hpp"
+
+#include "../tagsManager.hpp"
 #include "tagDesc.hpp"
 
 using namespace geode::prelude;

@@ -62,10 +62,38 @@ bool BetaSearch::setup(std::string tag) {
     menu->setContentSize({400, 270});
     m_mainLayer->addChild(menu);
 
+    auto aple = CCMenuItemSpriteExtra::create(CCSprite::create("goodapple.png"_spr), this, menu_selector(BetaSearch::makeVisible));
+    aple->setPosition({m_mainLayer->getContentWidth()/2, 80});
+    aple->setOpacity(0);
+    aple->m_scaleMultiplier = 0.f;
+    menuPage2->addChild(aple);
+
+    auto sogy = CCMenuItemSpriteExtra::create(CCSprite::create("yes.png"_spr), this, menu_selector(BetaSearch::makeVisible));
+    sogy->setPosition({m_mainLayer->getContentWidth()/2+100, 80});
+    sogy->setOpacity(0);
+    sogy->m_scaleMultiplier = 0.f;
+    menuPage2->addChild(sogy);
+
+    auto glugus = CCMenuItemSpriteExtra::create(CCSprite::create("jpg.png"_spr), this, menu_selector(BetaSearch::makeVisible));
+    glugus->setPosition({m_mainLayer->getContentWidth()/2-100, 80});
+    glugus->setOpacity(0);
+    glugus->m_scaleMultiplier = 0.f;
+    menuPage2->addChild(glugus);
+
     auto infoBtn = CCMenuItemSpriteExtra::create(CCSprite::createWithSpriteFrameName("GJ_infoIcon_001.png"), this, menu_selector(BetaSearch::info));
     infoBtn->setPosition({375, 27});
+    infoBtn->setColor({ 80, 80, 80 });
     infoBtn->setID("info");
     menu->addChild(infoBtn);
+
+    auto creditsSpr = ButtonSprite::create("Credits", 0.5f);
+    creditsSpr->setContentHeight(25);
+    creditsSpr->m_BGSprite->setContentHeight(25);
+
+    auto creditsBtn = CCMenuItemSpriteExtra::create(creditsSpr, this, menu_selector(BetaSearch::credits));
+    creditsBtn->setPosition({menuPage2->getContentWidth() / 2, 20});
+    creditsBtn->setID("credits");
+    menuPage2->addChild(creditsBtn);
 
     auto filterBG = CCScale9Sprite::create("square02b_001.png");
     filterBG->setContentSize({380, 90});
@@ -108,6 +136,19 @@ bool BetaSearch::setup(std::string tag) {
     search->setPosition({370, 245});
     search->setID("search");
     menu->addChild(search);
+    
+    // auto savedToggle = CCMenuItemToggler::create(
+    //     CCSprite::createWithSpriteFrameName("GJ_checkOff_001.png"), CCSprite::createWithSpriteFrameName("GJ_checkOn_001.png"), this, menu_selector(BetaSearch::saved)
+    // );
+    // savedToggle->setID("saved-toggle");
+    // savedToggle->setPosition({40, 200});
+    // menuPage2->addChild(savedToggle);
+
+    // auto savedLabel = CCLabelBMFont::create("Saved Levels", "bigFont.fnt");
+    // savedLabel->setPosition({115, 200});
+    // savedLabel->setID("saved-label");
+    // savedLabel->setScale(0.5);
+    // menuPage2->addChild(savedLabel);
 
     // auto toggleUncompleted = CCMenuItemToggler::create(
     //     CCSprite::createWithSpriteFrameName("GJ_checkOff_001.png"), CCSprite::createWithSpriteFrameName("GJ_checkOn_001.png"), this, menu_selector(BetaSearch::uncompleted)
@@ -134,21 +175,6 @@ bool BetaSearch::setup(std::string tag) {
     // completedLabel->setID("completed-label");
     // completedLabel->setScale(0.5);
     // menuPage2->addChild(completedLabel);
-
-    auto aple = CCMenuItemSpriteExtra::create(CCSprite::create("goodapple.png"_spr), this, menu_selector(BetaSearch::makeVisible));
-    aple->setPosition({m_mainLayer->getContentWidth()/2, 70});
-    aple->setOpacity(0);
-    menuPage2->addChild(aple);
-
-    auto sogy = CCMenuItemSpriteExtra::create(CCSprite::create("yes.png"_spr), this, menu_selector(BetaSearch::makeVisible));
-    sogy->setPosition({m_mainLayer->getContentWidth()/2+100, 70});
-    sogy->setOpacity(0);
-    menuPage2->addChild(sogy);
-
-    auto glugus = CCMenuItemSpriteExtra::create(CCSprite::create("jpg.png"_spr), this, menu_selector(BetaSearch::makeVisible));
-    glugus->setPosition({m_mainLayer->getContentWidth()/2-100, 70});
-    glugus->setOpacity(0);
-    menuPage2->addChild(glugus);
 
     auto menuInclude = CCMenu::create();
     menuInclude->setContentSize({180, 30});
@@ -227,48 +253,31 @@ bool BetaSearch::setup(std::string tag) {
     menuGameplay->setScale(0.85);
     menuPage1->addChild(menuGameplay);
 
-    auto loadingTags = LoadingSpinner::create(30);
-    loadingTags->setPosition({m_mainLayer->getContentWidth() / 2, 95});
-    menuPage1->addChild(loadingTags);
+    auto json = TagsManager::sharedState()->tags;
 
-    m_listener.bind([this, loadingTags](web::WebTask::Event* e) {
-        if (auto res = e->getValue(); res && res->ok()) {
-            menuPage1->removeChild(loadingTags, true);
-            jsonStr = res->string().unwrapOr("{}");
-            auto json = matjson::parse(jsonStr).unwrapOr("{}");
+    if (!json.contains("style") || !json.contains("theme") || !json.contains("meta") || !json.contains("gameplay")) {
+        Notification::create("Failed to retrieve tags from the server.", NotificationIcon::Error, 2)->show();
+        return true;
+    }
 
-            if (!json.contains("style") || !json.contains("theme") || !json.contains("classic-meta") || !json.contains("plat-meta") || !json.contains("classic-gp") || !json.contains("plat-gp")) {
-                Notification::create("Failed to retrieve tags from the server.", NotificationIcon::Error, 2)->show();
-                return;
-            }
-
-            std::vector<std::string> meta = json["classic-meta"].as<std::vector<std::string>>().unwrap();
-            std::unordered_set<std::string> metab(meta.begin(), meta.end());
-
-            for (const auto& value2 : json["plat-meta"]) {
-                std::string val = value2.asString().unwrapOr("");
-                if (metab.insert(val).second) meta.push_back(val);
-            }
-
-            std::vector<std::string> gameplay = json["classic-gp"].as<std::vector<std::string>>().unwrap();
-            std::unordered_set<std::string> gameplayb(gameplay.begin(), gameplay.end());
-
-            for (const auto& value2 : json["plat-gp"]) {
-                std::string val = value2.asString().unwrapOr("");
-                if (gameplayb.insert(val).second) {
-                    gameplay.push_back(val);
-                }
-            }
-
-            addTagsList(2, json["style"].as<std::vector<std::string>>().unwrap());
-            addTagsList(3, json["theme"].as<std::vector<std::string>>().unwrap());
-            addTagsList(4, meta);
-            addTagsList(5, gameplay);
-            menuGameplay->updateLayout();
+    std::vector<std::tuple<std::string, int, CCMenu*>> categories = {
+        {"style", 2, menuStyle}, {"theme", 3, menuTheme}, {"meta", 4, menuMeta}, {"gameplay", 5, menuGameplay}
+    };
+    
+    for (auto const& [category, index, menu] : categories) {
+        for (auto const& [key, value] : json[category]) {
+            if (TagsManager::sharedState()->getTagObject(key) == matjson::Value()) continue;
+            auto spr = CCMenuItemSpriteExtra::create(
+                TagsManager::addTag(TagsManager::sharedState()->getTagObject(key), 0.5), this, menu_selector(TagDesc::open)
+            );
+            auto btn = CCMenuItemSpriteExtra::create(spr, this, menu_selector(BetaSearch::btn));
+            btn->setID(key);
+            btn->setZOrder(tagZ++);
+            btn->setTag(index);
+            menu->addChild(btn);
+            menu->updateLayout();
         }
-    });
-    auto req = web::WebRequest();
-    m_listener.setFilter(req.get("https://raw.githubusercontent.com/KampWskiR/test3/main/tags.json"));
+    }
 
     return true;
 }
@@ -277,15 +286,19 @@ void BetaSearch::makeVisible(CCObject* sender) {
     static_cast<CCMenuItemSpriteExtra*>(sender)->setOpacity(255);
 };
 
-void BetaSearch::info(CCObject*) {
-    auto json = matjson::parse(jsonStr).unwrapOr("{}");
-
-    if (!json.contains("style") || !json.contains("theme") || !json.contains("classic-meta") || !json.contains("plat-meta") || !json.contains("classic-gp") || !json.contains("plat-gp")) {
-        Notification::create("Failed to retrieve tags from the server.", NotificationIcon::Error, 2)->show();
-        return;
+void BetaSearch::info(CCObject* sender) {
+    auto infoBtn = static_cast<CCMenuItemSpriteExtra*>(sender);
+    tagInfoSelected = !tagInfoSelected;
+    if (tagInfoSelected) {
+        infoBtn->setColor({255, 255, 255});
+    } else {
+        infoBtn->setColor({80, 80, 80});
     }
-    TagInfo::create(jsonStr)->show();
 };
+
+void BetaSearch::credits(CCObject*) {
+    CreditsPopup::create(true)->show();
+}
 
 CCMenu* BetaSearch::createMenu(std::string name) {
     CCMenu* menu = CCMenu::create();
@@ -301,6 +314,10 @@ CCMenu* BetaSearch::createMenu(std::string name) {
 
 void BetaSearch::uncompleted(CCObject*) {
     uncompletedSelected = !uncompletedSelected;
+}
+
+void BetaSearch::saved(CCObject*) {
+    savedSelected = !savedSelected;
 }
 
 void BetaSearch::sortPageUp(CCObject*) {
@@ -324,6 +341,7 @@ void BetaSearch::sortPageDown(CCObject*) {
         case 2: sortText->setString("Random"); break;
     }
 }
+
 void BetaSearch::tagMenuChange(CCObject* sender) {
     if (auto category = static_cast<CCMenuItemSpriteExtra*>(sender); category->getID() == "include-bg") {
         includeSelected = true;
@@ -419,7 +437,6 @@ void BetaSearch::search(CCObject*) {
     m_listener.setFilter(req.get("https://raw.githubusercontent.com/KampWskiR/test3/main/leveltags.json"));
 }
 
-
 void BetaSearch::category(CCObject* sender) {
     CCMenuItemSpriteExtra* category = static_cast<CCMenuItemSpriteExtra*>(sender);
     menuStyle->setVisible(false);
@@ -437,6 +454,12 @@ void BetaSearch::category(CCObject* sender) {
 
 void BetaSearch::btn(CCObject* sender) {
     CCMenuItemSpriteExtra* clickedButton = static_cast<CCMenuItemSpriteExtra*>(sender);
+
+    if (tagInfoSelected) {
+        TagDesc::create(clickedButton->getID())->show();
+        return;
+    }
+    
 
     if (clickedButton->getParent()->getID() == "menu-include" || clickedButton->getParent()->getID() == "menu-exclude") {
         if (clickedButton->getParent()->getID() == "menu-include") {
@@ -472,20 +495,6 @@ void BetaSearch::btn(CCObject* sender) {
     menuMeta->updateLayout();
     menuGameplay->updateLayout();
     menuPage1->getChildByID(includeSelected ? "menu-include" : "menu-exclude")->updateLayout();
-}
-
-void BetaSearch::addTagsList(int tag, std::vector<std::string> tags) {
-    CCMenu* menus[] = {menuStyle, menuTheme, menuMeta, menuGameplay};
-    for (int i = 0; i < tags.size(); i++) {
-        auto spr = TagsManager::addTag(tags[i].c_str(), 0.5);
-        auto btn = CCMenuItemSpriteExtra::create(spr, this, menu_selector(BetaSearch::btn));
-        btn->setID(tags[i]);
-        btn->setZOrder(tagZ);
-        btn->setTag(tag);
-        menus[tag-2]->addChild(btn);
-        tagZ++;
-    }
-    menus[tag-2]->updateLayout();
 }
 
 BetaSearch* BetaSearch::create(std::string tag) {

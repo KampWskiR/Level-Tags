@@ -49,16 +49,46 @@ CCSprite* TagsManager::getTagSprite(std::string tag) {
     return tagIcon;
 }
 
-IconButtonSprite* TagsManager::addTag(std::string tag, float scale) {
+matjson::Value TagsManager::getTagObject(std::string tag) {
+    for (auto& [category, tagObj] : TagsManager::sharedState()->tags) {
+        if (tagObj.contains(tag)) {
+            for (auto& [key, value] : tagObj) {
+                if (key == tag) {
+                    matjson::Value obj = matjson::Value();
+                    obj[tag] = tagObj[tag];
+                    return obj;
+                }
+            }
+        }
+    }
+    return matjson::Value();
+};
+
+IconButtonSprite* TagsManager::addTag(matjson::Value tag, float scale) {
+    std::string tagName;
+    matjson::Value tagInfo = matjson::Value::array();
+    for (auto& [key, value] : tag) {
+        tagName = key;
+        tagInfo = value;
+    }
+    ccColor3B tagColor = tagInfo[1].as<ccColor3B>().unwrapOr(ccColor3B(0,0,0));
     auto tagNode = IconButtonSprite::create(
         "tagSquare.png"_spr, 
-        getTagSprite(tag), 
-        tag.c_str(), "bigFont.fnt"
+        getTagSprite(tagName.c_str()), 
+        tagName.c_str(), "bigFont.fnt"
     );
     tagNode->setScale(scale);
-    tagNode->setColor(TagsManager::color(tag));
+    tagNode->setColor(tagColor); 
     tagNode->setOpacity(255);
     tagNode->getIcon()->setScale(0.5);
+
+    // if (tagName == "circles") {
+    //     CCDelayTime* delay = CCDelayTime::create(0.3);
+    //     CCActionInterval* sequence = CCSequence::create(
+    //         CCTintTo::create(0, 255, 50, 50), delay, CCTintTo::create(0, 100, 25, 25), delay,
+    //         CCTintTo::create(0, 255, 125, 50), delay, CCTintTo::create(0, 100, 50, 25), delay, nullptr
+    //     ); tagNode->runAction(CCRepeatForever::create(sequence));
+    // }
 
     return tagNode;
 }

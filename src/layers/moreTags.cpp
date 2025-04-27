@@ -18,16 +18,24 @@ bool MoreTags::setup(matjson::Value tags) {
 
     if (!tags.isNull() && tags.isArray()) {
         for (const auto& tag : tags) {
-            auto tagNode = CCMenuItemSpriteExtra::create(TagsManager::addTag(tag.asString().unwrapOr(""), 0.35), this, menu_selector(TagDesc::open));
+            if (TagsManager::sharedState()->getTagObject(tag.asString().unwrapOr("")) == matjson::Value()) continue;
+            auto tagNode = CCMenuItemSpriteExtra::create(
+                TagsManager::addTag(TagsManager::sharedState()->getTagObject(tag.asString().unwrapOr("")), 0.35), this, menu_selector(TagDesc::open)
+            );
             tagNode->setID(tag.asString().unwrapOr(""));
             tagMenu->addChild(tagNode);
             tagMenu->updateLayout();
         }
-        m_mainLayer->setContentHeight(30.f + tagMenu->getContentHeight());
+        m_mainLayer->setContentHeight(55.f + tagMenu->getContentHeight());
         m_mainLayer->updateLayout();
         tagMenu->setPositionY(m_mainLayer->getContentHeight() - 15);
         descMenu->setPositionY(m_mainLayer->getContentHeight() - 10);
         descMenu->setContentHeight(tagMenu->getContentHeight() + 10);
+
+        auto closeSpr = ButtonSprite::create("Close");
+        closeSpr->setScale(0.75);
+        m_closeBtn->setSprite(closeSpr);
+        m_closeBtn->setPosition({m_mainLayer->getContentWidth() / 2, 20});
     }
 
     return true;
@@ -35,7 +43,7 @@ bool MoreTags::setup(matjson::Value tags) {
 
 MoreTags* MoreTags::create(matjson::Value tags) {
     auto ret = new MoreTags();
-    if (ret->initAnchored(280.f, 20.f, tags, "square.png"_spr)) {
+    if (ret->initAnchored(260.f, 20.f, tags, "square.png"_spr)) {
         ret->autorelease();
         return ret;
     }

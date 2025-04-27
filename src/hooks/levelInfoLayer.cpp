@@ -1,13 +1,13 @@
 #include <Geode/Geode.hpp>
 #include <Geode/utils/web.hpp>
-#include "tagsManager.hpp"
-#include "tagDesc.hpp"
-#include "moreTags.hpp"
 #include <Geode/modify/LevelInfoLayer.hpp>
 
-using namespace geode::prelude;
+#include "../tagsManager.hpp"
+#include "../layers/tagDesc.hpp"
+#include "../layers/moreTags.hpp"
+#include "../layers/requestTag.hpp"
 
-#include "requestTag.hpp"
+using namespace geode::prelude;
 
 class $modify(TagsLevelInfoLayer, LevelInfoLayer) {
     struct Fields {
@@ -38,6 +38,11 @@ class $modify(TagsLevelInfoLayer, LevelInfoLayer) {
     void loadCustomLevelInfoLayer() {
         if (!Mod::get()->getSettingValue<bool>("levelInfoShow")) return;
 
+        if (TagsManager::sharedState()->tags.size() == 0) {
+            Notification::create("Failed to retrieve tags from the server.", NotificationIcon::Error, 2)->show();
+            return;
+        }
+
         if (TagsManager::sharedState()->cachedTags[std::to_string(m_level->m_levelID)].size() != 0) {
             m_fields->tags = TagsManager::sortTags(TagsManager::sharedState()->cachedTags[std::to_string(m_level->m_levelID)]);
             updateTags();
@@ -59,30 +64,34 @@ class $modify(TagsLevelInfoLayer, LevelInfoLayer) {
         m_fields->m_listener.setFilter(req.get(fmt::format("https://raw.githubusercontent.com/KampWskiR/test3/main/tags/{}.json", m_level->m_levelID.value())));
     };
 
-    CCMenu* createTagContainer() {
+    void updateTags() {
+        if (auto titleLabel = this->getChildByID("title-label")) titleLabel->setPositionY(titleLabel->getPositionY() - 4);
+        if (auto titleLabel = this->getChildByID("title-label")) titleLabel->setScale(titleLabel->getScale() - 0.1);
+        if (auto dailyLabel = this->getChildByID("daily-label")) dailyLabel->setPositionY(dailyLabel->getPositionY() - 2);
+
         CCSize winSize = CCDirector::get()->getWinSize();
 
         auto tagMenu = CCMenu::create();
         tagMenu->setLayout(RowLayout::create()->setAutoScale(false)->setGap(2)->setAxisAlignment(AxisAlignment::Center));
-        tagMenu->setPosition({winSize.width / 2, 313});
+        tagMenu->setPosition({winSize.width / 2, winSize.height - 8});
         tagMenu->setID("level-tags");
-
-        return tagMenu;
-    };
-
-    void updateTags() {
-        if (auto titleLabel = this->getChildByID("title-label")) titleLabel->setPositionY(titleLabel->getPositionY() - 4);
-
-        auto tagMenu = createTagContainer();
         this->addChild(tagMenu);
 
         if (!m_fields->tags.isNull() && m_fields->tags.isArray()) {
+            auto tagCount = m_fields->tags.size();
             for (const auto& tag : m_fields->tags) {
-                auto tagNode = CCMenuItemSpriteExtra::create(TagsManager::addTag(tag.asString().unwrapOr(""), 0.35), this, menu_selector(TagDesc::open));
+                if (TagsManager::sharedState()->getTagObject(tag.asString().unwrapOr("")) == matjson::Value()) {
+                    tagCount--;
+                    continue;
+                }
+                auto tagNode = CCMenuItemSpriteExtra::create(
+                    TagsManager::addTag(TagsManager::sharedState()->getTagObject(tag.asString().unwrapOr("")),
+                    0.35), this, menu_selector(TagDesc::open)
+                );
                 tagNode->setID(tag.asString().unwrapOr(""));
                 tagMenu->addChild(tagNode);
                 tagMenu->updateLayout();
-                if (tagNode->getPositionX() > 400) {
+                if (tagNode->getPositionX() > 400 && tagCount != tagMenu->getChildrenCount()) {
                     auto expandSpr = IconButtonSprite::create("tagSquare.png"_spr, CCSprite::createWithSpriteFrameName("PBtn_Arrow_001.png"), "more", "bigFont.fnt");
                     expandSpr->setScale(0.35);
 
@@ -96,5 +105,5 @@ class $modify(TagsLevelInfoLayer, LevelInfoLayer) {
                 }
             }
         }
-    };
+    }
 };

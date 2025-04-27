@@ -3,8 +3,9 @@
 #include <Geode/utils/web.hpp>
 #include <Geode/ui/LoadingSpinner.hpp>
 #include <random>
-#include "tagsManager.hpp"
-#include "tagInfo.hpp"
+
+#include "../tagsManager.hpp"
+#include "../layers/credits.hpp"
 
 using namespace geode::prelude;
 
@@ -22,15 +23,18 @@ private:
     CCMenuItemSpriteExtra* includeBG;
     CCMenuItemSpriteExtra* excludeBG;
     bool uncompletedSelected = false;
+    bool savedSelected = false;
     std::vector<std::string> include;
     std::vector<std::string> exclude;
     CCLabelBMFont* sortText;
     std::string jsonStr;
     int sort = 0;
     int tagZ = 0;
+    bool tagInfoSelected = false;
 
     void makeVisible(CCObject* sender);
     void info(CCObject*);
+    void credits(CCObject*);
     CCMenu* createMenu(std::string name);
     void uncompleted(CCObject*);
     void sortPageUp(CCObject*);
@@ -40,6 +44,7 @@ private:
     void search(CCObject* sender);
     void category(CCObject* sender);
     void btn(CCObject* sender);
+    void saved(CCObject* sender);
     void addTagsList(int tag, std::vector<std::string> tags);
 
 protected:

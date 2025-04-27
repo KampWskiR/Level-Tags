@@ -1,3 +1,9 @@
+# v0.3.3-alpha
+- Minor rework to the tags system
+- Added a Credits page
+- Small tweaks to levelCell
+- Beta Search is now available by default
+
 # v0.3.2-alpha
 - Added Pause Screen tags option
 - Added tags and descriptions caching

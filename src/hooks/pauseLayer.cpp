@@ -1,10 +1,11 @@
-using namespace geode::prelude;
-
 #include <Geode/modify/PauseLayer.hpp>
 #include <Geode/utils/web.hpp>
-#include "tagsManager.hpp"
-#include "tagDesc.hpp"
-#include "moreTags.hpp"
+
+#include "../tagsManager.hpp"
+#include "../layers/tagDesc.hpp"
+#include "../layers/moreTags.hpp"
+
+using namespace geode::prelude;
 
 class $modify(TagsPauseLayer, PauseLayer) {
     struct Fields {
@@ -16,6 +17,7 @@ class $modify(TagsPauseLayer, PauseLayer) {
     virtual void customSetup() {
         PauseLayer::customSetup();
         if (!Mod::get()->getSettingValue<bool>("pauseLayerShow")) return;
+        if (TagsManager::sharedState()->tags.size() == 0) return;
 
         if (TagsManager::sharedState()->cachedTags[std::to_string(m_fields->levelId)].size() != 0) {
             m_fields->tags = TagsManager::sortTags(TagsManager::sharedState()->cachedTags[std::to_string(m_fields->levelId)]);
@@ -47,12 +49,19 @@ class $modify(TagsPauseLayer, PauseLayer) {
         this->addChild(tagMenu);
 
         if (!m_fields->tags.isNull() && m_fields->tags.isArray()) {
+            auto tagCount = m_fields->tags.size();
             for (const auto& tag : m_fields->tags) {
-                auto tagNode = CCMenuItemSpriteExtra::create(TagsManager::addTag(tag.asString().unwrapOr(""), 0.35), this, menu_selector(TagDesc::open));
+                if (TagsManager::sharedState()->getTagObject(tag.asString().unwrapOr("")) == matjson::Value()) {
+                    tagCount--;
+                    continue;
+                }
+                auto tagNode = CCMenuItemSpriteExtra::create(
+                    TagsManager::addTag(TagsManager::sharedState()->getTagObject(tag.asString().unwrapOr("")),0.35), this, menu_selector(TagDesc::open)
+                );
                 tagNode->setID(tag.asString().unwrapOr(""));
                 tagMenu->addChild(tagNode);
                 tagMenu->updateLayout();
-                if (tagNode->getPositionX() > 450) {
+                if (tagNode->getPositionX() > 450 && tagCount != tagMenu->getChildrenCount()) {
                     auto expandSpr = IconButtonSprite::create("tagSquare.png"_spr, CCSprite::createWithSpriteFrameName("PBtn_Arrow_001.png"), "more", "bigFont.fnt");
                     expandSpr->setScale(0.35);
 
