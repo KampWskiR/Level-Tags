@@ -71,7 +71,7 @@ IconButtonSprite* TagsManager::addTag(matjson::Value tag, float scale) {
         tagName = key;
         tagInfo = value;
     }
-    ccColor3B tagColor = tagInfo[1].as<ccColor3B>().unwrapOr(ccColor3B(0,0,0));
+    ccColor3B tagColor = tagInfo[1].as<ccColor3B>().unwrapOr(ccColor3B{0, 0, 0});
     auto tagNode = IconButtonSprite::create(
         "tagSquare.png"_spr, 
         getTagSprite(tagName.c_str()), 

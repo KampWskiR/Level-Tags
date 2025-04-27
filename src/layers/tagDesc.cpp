@@ -2,7 +2,7 @@
 
 bool TagDesc::setup(std::string tag) {
     matjson::Value tagObject = TagsManager::sharedState()->getTagObject(tag)[tag];
-    ccColor3B color = tagObject[1].as<ccColor3B>().unwrapOr(ccColor3B(0, 0, 0));
+    ccColor3B color = tagObject[1].as<ccColor3B>().unwrapOr(ccColor3B{ 0, 0, 0 });
     std::string description = tagObject[2].as<std::string>().unwrapOr("no description provided");
     auto iconBg = CCScale9Sprite::create("square02b_001.png");
     iconBg->setContentSize({70, 70});

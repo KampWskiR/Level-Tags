@@ -19,7 +19,7 @@ class $modify(TagsMenuLayer, MenuLayer) {
     $override
     bool init() {
         if (!MenuLayer::init()) return false;
-        if (!TagsManager::sharedState()->tags.size() == 0) return true;
+        if (TagsManager::sharedState()->tags.size() != 0) return true;
 
         m_fields->m_listener.bind([this](web::WebTask::Event* e) {
             if (auto res = e->getValue(); res && res->ok()) {
