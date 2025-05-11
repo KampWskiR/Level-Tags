@@ -24,25 +24,9 @@ matjson::Value TagsManager::sortTags(matjson::Value tags) {
     return result;
 }
 
-ccColor3B TagsManager::color(const std::string& tag) {
-    std::hash<std::string> hasher;
-    size_t hashValue = hasher(tag);
-
-    GLubyte r = (hashValue >> 16) & 0xFF;
-    GLubyte g = (hashValue >> 8) & 0xFF;
-    GLubyte b = hashValue & 0xFF;
-
-    if (r < 100) r = 100;
-    if (g < 100) g = 100;
-    if (b < 100) b = 100;
-
-    return { r, g, b };
-}
-
 CCSprite* TagsManager::getTagSprite(std::string tag) {
     auto tagIcon = CCSprite::createWithSpriteFrameName(fmt::format("{}"_spr, tag + ".png").c_str());
     if (!tagIcon || tagIcon->getUserObject("geode.texture-loader/fallback")) tagIcon = CCSprite::create("404.png"_spr);
-    tagIcon->setColor(TagsManager::color(tag));
     tagIcon->setPosition({50, 58});
     tagIcon->setScale(0.5);
 

@@ -6,6 +6,7 @@
 #include "../layers/tagDesc.hpp"
 #include "../layers/moreTags.hpp"
 #include "../layers/requestTag.hpp"
+// #include "../layers/requestsPopup.hpp"
 
 using namespace geode::prelude;
 
@@ -15,6 +16,7 @@ class $modify(TagsLevelInfoLayer, LevelInfoLayer) {
         matjson::Value tags;
     };
 
+    //void request(CCObject* sender) {RequestsPopup::create(m_level)->show();}
     void request(CCObject* sender) {RequestTag::create({std::to_string(m_level->m_levelID.value()), m_level->isPlatformer()})->show();}
 
     void moreTags(CCObject* sender) {MoreTags::create(m_fields->tags)->show();}
@@ -67,7 +69,7 @@ class $modify(TagsLevelInfoLayer, LevelInfoLayer) {
     void updateTags() {
         if (auto titleLabel = this->getChildByID("title-label")) titleLabel->setPositionY(titleLabel->getPositionY() - 4);
         if (auto titleLabel = this->getChildByID("title-label")) titleLabel->setScale(titleLabel->getScale() - 0.1);
-        if (auto dailyLabel = this->getChildByID("daily-label")) dailyLabel->setPositionY(dailyLabel->getPositionY() - 2);
+        if (auto dailyLabel = this->getChildByID("daily-label")) dailyLabel->setPositionY(dailyLabel->getPositionY() - 4);
 
         CCSize winSize = CCDirector::get()->getWinSize();
 

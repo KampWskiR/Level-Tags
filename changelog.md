@@ -1,7 +1,7 @@
 # v0.3.3-alpha
-- Minor rework to the tags system
+- Minor rework of the tags system
 - Added a Credits page
-- Small tweaks to levelCell
+- Small tweaks to the levelCell
 - Beta Search is now available by default
 
 # v0.3.2-alpha

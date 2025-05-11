@@ -10,6 +10,8 @@ using namespace geode::prelude;
 
 class CreditsPopup : public geode::Popup<bool> {
 protected:
+    EventListener<web::WebTask> m_listener;
+
     bool setup(bool a);
     CCNode* tabSprite(std::string name, std::string role);
     void btn(CCObject* sender);

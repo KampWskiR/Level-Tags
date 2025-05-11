@@ -62,36 +62,14 @@ bool BetaSearch::setup(std::string tag) {
     menu->setContentSize({400, 270});
     m_mainLayer->addChild(menu);
 
-    auto aple = CCMenuItemSpriteExtra::create(CCSprite::create("goodapple.png"_spr), this, menu_selector(BetaSearch::makeVisible));
-    aple->setPosition({m_mainLayer->getContentWidth()/2, 80});
-    aple->setOpacity(0);
-    aple->m_scaleMultiplier = 0.f;
-    menuPage2->addChild(aple);
-
-    auto sogy = CCMenuItemSpriteExtra::create(CCSprite::create("yes.png"_spr), this, menu_selector(BetaSearch::makeVisible));
-    sogy->setPosition({m_mainLayer->getContentWidth()/2+100, 80});
-    sogy->setOpacity(0);
-    sogy->m_scaleMultiplier = 0.f;
-    menuPage2->addChild(sogy);
-
-    auto glugus = CCMenuItemSpriteExtra::create(CCSprite::create("jpg.png"_spr), this, menu_selector(BetaSearch::makeVisible));
-    glugus->setPosition({m_mainLayer->getContentWidth()/2-100, 80});
-    glugus->setOpacity(0);
-    glugus->m_scaleMultiplier = 0.f;
-    menuPage2->addChild(glugus);
-
     auto infoBtn = CCMenuItemSpriteExtra::create(CCSprite::createWithSpriteFrameName("GJ_infoIcon_001.png"), this, menu_selector(BetaSearch::info));
     infoBtn->setPosition({375, 27});
     infoBtn->setColor({ 80, 80, 80 });
     infoBtn->setID("info");
     menu->addChild(infoBtn);
 
-    auto creditsSpr = ButtonSprite::create("Credits", 0.5f);
-    creditsSpr->setContentHeight(25);
-    creditsSpr->m_BGSprite->setContentHeight(25);
-
-    auto creditsBtn = CCMenuItemSpriteExtra::create(creditsSpr, this, menu_selector(BetaSearch::credits));
-    creditsBtn->setPosition({menuPage2->getContentWidth() / 2, 20});
+    auto creditsBtn = CCMenuItemSpriteExtra::create(ButtonSprite::create("Credits"), this, menu_selector(BetaSearch::credits));
+    creditsBtn->setPosition({menuPage2->getContentWidth() / 2, 30});
     creditsBtn->setID("credits");
     menuPage2->addChild(creditsBtn);
 
@@ -101,6 +79,11 @@ bool BetaSearch::setup(std::string tag) {
     filterBG->setColor({ 0, 0, 0 });
     filterBG->setOpacity(100);
     menuPage2->addChild(filterBG);
+
+    auto soonLabel = CCLabelBMFont::create("More Filters Coming Soon", "bigFont.fnt");
+    soonLabel->setPosition({m_mainLayer->getContentWidth() / 2, 95});
+    soonLabel->setScale(0.4);
+    menuPage2->addChild(soonLabel);
 
     auto sortMenu = CCMenu::create();
     sortMenu->setPosition({0, 165});
@@ -136,45 +119,6 @@ bool BetaSearch::setup(std::string tag) {
     search->setPosition({370, 245});
     search->setID("search");
     menu->addChild(search);
-    
-    // auto savedToggle = CCMenuItemToggler::create(
-    //     CCSprite::createWithSpriteFrameName("GJ_checkOff_001.png"), CCSprite::createWithSpriteFrameName("GJ_checkOn_001.png"), this, menu_selector(BetaSearch::saved)
-    // );
-    // savedToggle->setID("saved-toggle");
-    // savedToggle->setPosition({40, 200});
-    // menuPage2->addChild(savedToggle);
-
-    // auto savedLabel = CCLabelBMFont::create("Saved Levels", "bigFont.fnt");
-    // savedLabel->setPosition({115, 200});
-    // savedLabel->setID("saved-label");
-    // savedLabel->setScale(0.5);
-    // menuPage2->addChild(savedLabel);
-
-    // auto toggleUncompleted = CCMenuItemToggler::create(
-    //     CCSprite::createWithSpriteFrameName("GJ_checkOff_001.png"), CCSprite::createWithSpriteFrameName("GJ_checkOn_001.png"), this, menu_selector(BetaSearch::uncompleted)
-    // );
-    // toggleUncompleted->setID("uncompleted-toggle");
-    // toggleUncompleted->setPosition({40, 200});
-    // menuPage2->addChild(toggleUncompleted);
-
-    // auto uncompletedLabel = CCLabelBMFont::create("Uncompleted", "bigFont.fnt");
-    // uncompletedLabel->setPosition({115, 200});
-    // uncompletedLabel->setID("uncompleted-label");
-    // uncompletedLabel->setScale(0.5);
-    // menuPage2->addChild(uncompletedLabel);
-
-    // auto toggleCompleted = CCMenuItemToggler::create(
-    //     CCSprite::createWithSpriteFrameName("GJ_checkOff_001.png"), CCSprite::createWithSpriteFrameName("GJ_checkOn_001.png"), this, menu_selector(BetaSearch::uncompleted)
-    // );
-    // toggleCompleted->setID("completed-toggle");
-    // toggleCompleted->setPosition({40, 160});
-    // menuPage2->addChild(toggleCompleted);
-
-    // auto completedLabel = CCLabelBMFont::create("Completed", "bigFont.fnt");
-    // completedLabel->setPosition({105, 160});
-    // completedLabel->setID("completed-label");
-    // completedLabel->setScale(0.5);
-    // menuPage2->addChild(completedLabel);
 
     auto menuInclude = CCMenu::create();
     menuInclude->setContentSize({180, 30});
