@@ -46,7 +46,7 @@
         },
 		"levelInfoShow": {
 			"name": "LevelInfoLayer Tags",
-			"description": "Enable tags displaying in LevelInfoLayer",
+			"description": "Enable tags displaying in LevelInfoLayer.",
 			"type": "bool",
 			"default": false
 		},
