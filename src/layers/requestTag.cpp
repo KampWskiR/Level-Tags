@@ -8,7 +8,7 @@ bool RequestTag::setup(std::vector<std::variant<std::string, bool>> level) {
 
     this->setTitle("Requesting temporarily closed");
 
-    auto sad = CCSprite::create("sad.png"_spr);
+    auto sad = CCSprite::create("sadreq.png"_spr);
     sad->setPosition({m_mainLayer->getContentWidth() / 2, 95});
     sad->setOpacity(50);
     m_mainLayer->addChild(sad);
