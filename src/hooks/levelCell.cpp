@@ -12,12 +12,13 @@ void TagsLevelCell::adjustPositions() {
     adjustY({"level-name"}, m_compactView ? 42 : 77);
     adjustY({"copy-indicator", "high-object-indicator"}, m_compactView ? 40 : 55);
     adjustY({"ncs-icon"}, m_compactView ? 27.5 : 39.5);
+    adjustY({"chompo-icon"}, m_compactView ? 27.5 : 39.5);
     adjustY({"creator-name"}, m_compactView ? 27.5 : 39.5);
     adjustY({"song-name"}, m_compactView ? 28 : 40);
     adjustY({"length-icon", "length-label", "downloads-icon", "downloads-label", "likes-icon", "likes-label", "orbs-icon", "orbs-label"}, m_compactView ? 6 : 10);
     if (m_compactView) adjustY({"coin-icon-1", "coin-icon-2", "coin-icon-3"}, 26.5);
     if (auto creatorName = m_mainLayer->getChildByID("main-menu")->getChildByID("creator-name"))
-        creatorName->setPositionY(m_compactView ? -118 : -104);
+        creatorName->setPositionY(creatorName->getPositionY() + (m_compactView ? 0.5f : 3.5f));
 };
 
 void TagsLevelCell::loadCustomLevelCell() {
@@ -34,9 +35,12 @@ void TagsLevelCell::loadCustomLevelCell() {
     }
     if (m_level->m_dailyID == 0) return;
 
-    m_fields->m_listener.bind([this](web::WebTask::Event* e) {
-        if (auto res = e->getValue(); res && res->ok()) {
-            auto jsonStr = res->string().unwrapOr("{}");
+    auto req = geode::utils::web::WebRequest();
+
+    m_fields->m_listener.spawn(
+        req.get(fmt::format("{}/get?id={}", Mod::get()->getSettingValue<std::string>("serverUrl"), m_level->m_levelID.value())),
+        [this](geode::utils::web::WebResponse value) {
+            auto jsonStr = value.string().unwrapOr("{}");
             auto json = matjson::parse(jsonStr).unwrapOr("{}");
 
             m_fields->tags = TagsManager::sortTags(json[std::to_string(m_level->m_levelID)]);
@@ -46,12 +50,7 @@ void TagsLevelCell::loadCustomLevelCell() {
             adjustPositions();
             updateTags(false);
         }
-    });
-
-    auto req = web::WebRequest();
-    m_fields->m_listener.setFilter(req.get(
-        fmt::format("{}/get?id={}", Mod::get()->getSettingValue<std::string>("serverUrl"), m_level->m_levelID.value())
-    ));
+    );
 };
 
 CCMenu* TagsLevelCell::createTagContainer(bool extended) {
@@ -115,6 +114,7 @@ void TagsLevelCell::updateTags(bool extended) {
             arrow->setRotation(180);
             auto expandSpr = IconButtonSprite::create("tagSquare.png"_spr, arrow, "less", "bigFont.fnt");
             expandSpr->setScale(m_compactView ? 0.25 : 0.35);
+            expandSpr->getIcon()->setPositionX(23.f);
 
             auto tagExpand = CCMenuItemSpriteExtra::create(expandSpr, this, menu_selector(TagsLevelCell::setExpand));
             tagExpand->setAnchorPoint({0.5, 0.5});

@@ -4,6 +4,7 @@ using namespace geode::prelude;
 
 #include <Geode/Geode.hpp>
 #include <Geode/utils/web.hpp>
+#include "Geode/ui/GeodeUI.hpp"
 #include <random>
 
 #include "tagsSelect.hpp"
@@ -15,9 +16,10 @@ using namespace geode::prelude;
 
 class TagsSearch : public cocos2d::CCLayer {
 public:
-    EventListener<web::WebTask> m_listener;
+    async::TaskHolder<geode::utils::web::WebResponse> m_listener;
     CCMenu* includeMenu;
     CCMenu* excludeMenu;
+    CCMenuItemSpriteExtra* searchBtn;
     matjson::Value filters;
     std::vector<std::string> includeTags;
     std::vector<std::string> excludeTags;
@@ -38,9 +40,10 @@ public:
     void kofi(CCObject*);
     void onTags(cocos2d::CCObject* sender);
     void updateTags(bool include, std::vector<std::string> tags);
-    void search(CCObject* sender);
+    void search(CCObject*);
+    void keyDown(cocos2d::enumKeyCodes key, double timestamp) override;
 
-    void onBack(cocos2d::CCObject*);
+    void onBack(CCObject*);
     static CCScene* scene();
     static TagsSearch* create();
 };

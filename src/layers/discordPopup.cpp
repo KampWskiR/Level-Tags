@@ -1,6 +1,7 @@
 #include "discordPopup.hpp"
 
-bool DiscordPopup::setup(bool a) {
+bool DiscordPopup::init() {
+    if (!Popup::init(240.f, 120.f, "square.png"_spr)) return false;
     setTitle("Join Discord");
     m_title->setScale(0.8f);
 
@@ -64,12 +65,12 @@ void DiscordPopup::join(CCObject*) {
     onClose(this);
 }
 
-DiscordPopup* DiscordPopup::create(bool a) {
-    auto ret = new DiscordPopup();
-    if (ret->initAnchored(240.f, 120.f, a, "square.png"_spr)) {
-        ret->autorelease();
-        return ret;
+DiscordPopup* DiscordPopup::create() {
+    auto popup = new DiscordPopup;
+    if (popup->init()) {
+        popup->autorelease();
+        return popup;
     }
-    delete ret;
+    delete popup;
     return nullptr;
 }

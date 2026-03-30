@@ -12,7 +12,7 @@ using namespace geode::prelude;
 
 class $modify(TagsLevelCell, LevelCell) {
     struct Fields {
-        EventListener<web::WebTask> m_listener;
+        async::TaskHolder<geode::utils::web::WebResponse> m_listener;
         matjson::Value tags;
         bool extended = false;
     };

@@ -1,8 +1,7 @@
 #include "tagsSelect.hpp"
-#include "Geode/binding/CCMenuItemSpriteExtra.hpp"
-#include "Geode/cocos/cocoa/CCObject.h"
 
-bool TagsSelect::setup(TagsSearch* search) {
+bool TagsSelect::init(TagsSearch* search) {
+    if (!Popup::init(420.f, 270.f, "square.png"_spr)) return false;
     m_search = search;
     setTitle(search->includeSelected ? "Include Tags" : "Exclude Tags");
     m_title->setPositionY(255);
@@ -271,7 +270,7 @@ void TagsSelect::textChanged(CCTextInputNode* input) {
         auto children = menu->getChildren();
         for (int i = 0; i < children->count(); ++i) {
             auto item = static_cast<CCMenuItemSpriteExtra*>(children->objectAtIndex(i));
-            item->setVisible(item->getID().find(query) != std::string::npos);
+            item->setVisible(std::string(item->getID()).find(query) != std::string::npos);
         }
         menu->updateLayout();
     }
@@ -289,11 +288,11 @@ void TagsSelect::onClose(CCObject*) {
 }
 
 TagsSelect* TagsSelect::create(TagsSearch* search) {
-    auto ret = new TagsSelect();
-    if (ret->initAnchored(420.f, 270.f, search, "square.png"_spr)) {
-        ret->autorelease();
-        return ret;
+    auto popup = new TagsSelect;
+    if (popup->init(search)) {
+        popup->autorelease();
+        return popup;
     }
-    delete ret;
+    delete popup;
     return nullptr;
 }

@@ -1,6 +1,7 @@
 #include "moreTags.hpp"
 
-bool MoreTags::setup(matjson::Value tags) {
+bool MoreTags::init(matjson::Value tags) {
+    if (!Popup::init(280.f, 20.f, "square.png"_spr)) return false;
     auto tagMenu = CCMenu::create();
     tagMenu->setContentWidth(235);
     tagMenu->setPosition({m_mainLayer->getContentWidth() / 2, 95});
@@ -44,8 +45,10 @@ bool MoreTags::setup(matjson::Value tags) {
     descMenu->setAnchorPoint({0.5, 1});
     m_mainLayer->addChild(descMenu, 0);
 
-    m_mainLayer->addChild(TagsManager::sharedState()->addBgAnim(m_size));
-    m_bgSprite->setZOrder(-1);
+    auto bgAnim = TagsManager::sharedState()->addBgAnim(m_mainLayer->getContentSize());
+    bgAnim->setZOrder(-1);
+    m_mainLayer->addChild(bgAnim);
+    m_bgSprite->setZOrder(-2);
 
     for (int i = 0; i < 4; ++i) {
         auto corner = CCSprite::create("corner.png"_spr);
@@ -58,11 +61,11 @@ bool MoreTags::setup(matjson::Value tags) {
 }
 
 MoreTags* MoreTags::create(matjson::Value tags) {
-    auto ret = new MoreTags();
-    if (ret->initAnchored(280.f, 20.f, tags, "square.png"_spr)) {
-        ret->autorelease();
-        return ret;
+    auto popup = new MoreTags;
+    if (popup->init(tags)) {
+        popup->autorelease();
+        return popup;
     }
-    delete ret;
+    delete popup;
     return nullptr;
 }

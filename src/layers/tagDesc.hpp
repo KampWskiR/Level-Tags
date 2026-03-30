@@ -8,9 +8,9 @@
 
 using namespace geode::prelude;
 
-class TagDesc : public geode::Popup<std::string> {
+class TagDesc : public Popup {
 protected:
-    bool setup(std::string tag);
+    bool init(std::string tag);
 public:
     static TagDesc* create(std::string tag);
     void open(CCObject* sender);

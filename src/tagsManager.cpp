@@ -71,6 +71,7 @@ IconButtonSprite* TagsManager::addTag(matjson::Value tag, float scale) {
     tagNode->setColor(tagColor); 
     tagNode->setOpacity(255);
     tagNode->getIcon()->setScale(0.5);
+    tagNode->getIcon()->setPositionX(1.f);
 
     return tagNode;
 }
@@ -122,13 +123,12 @@ CCLayer* TagsManager::addCorners(CCSize size, float scale) {
 }
 
 void TagsManager::loadTagsInfo() {
-    m_listener.bind([](web::WebTask::Event* e) {
-        if (auto res = e->getValue(); res && res->ok()) {
-            auto jsonStr = res->string().unwrapOr("{}");
+    auto req = geode::utils::web::WebRequest();
+    m_listener.spawn(
+        req.get(fmt::format("{}/tags", Mod::get()->getSettingValue<std::string>("serverUrl"))),
+            [](geode::utils::web::WebResponse value) {
+            auto jsonStr = value.string().unwrapOr("{}");
             TagsManager::sharedState()->tags = matjson::parse(jsonStr).unwrapOr("{}");
         }
-    });
-
-    auto req = web::WebRequest();
-    m_listener.setFilter(req.get(fmt::format("{}/tags", Mod::get()->getSettingValue<std::string>("serverUrl"))));
+    );
 }

@@ -11,11 +11,11 @@ using namespace geode::prelude;
 
 class $modify(TagsLevelInfoLayer, LevelInfoLayer) {
     struct Fields {
-        EventListener<web::WebTask> m_listener;
+        async::TaskHolder<geode::utils::web::WebResponse> m_listener;
         matjson::Value tags;
     };
 
-    void request(CCObject* sender) {DiscordPopup::create(true)->show();}
+    void request(CCObject* sender) {DiscordPopup::create()->show();}
 
     void moreTags(CCObject* sender) {MoreTags::create(m_fields->tags)->show();}
 
@@ -54,9 +54,12 @@ class $modify(TagsLevelInfoLayer, LevelInfoLayer) {
             return;
         }
 
-        m_fields->m_listener.bind([this](web::WebTask::Event* e) {
-            if (auto res = e->getValue(); res && res->ok()) {
-                auto jsonStr = res->string().unwrapOr("{}");
+        auto req = geode::utils::web::WebRequest();
+
+        m_fields->m_listener.spawn(
+            req.get(fmt::format("{}/get?id={}", Mod::get()->getSettingValue<std::string>("serverUrl"), m_level->m_levelID.value())),
+            [this](geode::utils::web::WebResponse value) {
+                auto jsonStr = value.string().unwrapOr("{}");
                 auto json = matjson::parse(jsonStr).unwrapOr("{}");
 
                 m_fields->tags = TagsManager::sortTags(json[std::to_string(m_level->m_levelID)]);
@@ -64,10 +67,7 @@ class $modify(TagsLevelInfoLayer, LevelInfoLayer) {
                 if (m_fields->tags.size() == 0) return;
                 updateTags();
             }
-        });
-
-        auto req = web::WebRequest();
-        m_fields->m_listener.setFilter(req.get(fmt::format("{}/get?id={}", Mod::get()->getSettingValue<std::string>("serverUrl"), m_level->m_levelID.value())));
+        );
     };
 
     void updateTags() {
@@ -91,8 +91,7 @@ class $modify(TagsLevelInfoLayer, LevelInfoLayer) {
                     continue;
                 }
                 auto tagNode = CCMenuItemSpriteExtra::create(
-                    TagsManager::addTag(TagsManager::sharedState()->getTagObject(tag.asString().unwrapOr("")),
-                    0.35), this, menu_selector(TagDesc::open)
+                    TagsManager::addTag(TagsManager::sharedState()->getTagObject(tag.asString().unwrapOr("")), 0.35), this, menu_selector(TagDesc::open)
                 );
                 tagNode->setID(tag.asString().unwrapOr(""));
                 tagMenu->addChild(tagNode);

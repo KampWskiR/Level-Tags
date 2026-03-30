@@ -9,7 +9,7 @@ using namespace geode::prelude;
 
 class $modify(TagsPauseLayer, PauseLayer) {
     struct Fields {
-        EventListener<web::WebTask> m_listener;
+        async::TaskHolder<geode::utils::web::WebResponse> m_listener;
         int levelId = GameManager::sharedState()->m_gameLayer->get()->m_level->m_levelID;
         matjson::Value tags;
     };
@@ -17,7 +17,7 @@ class $modify(TagsPauseLayer, PauseLayer) {
     virtual void customSetup() {
         PauseLayer::customSetup();
         if (!Mod::get()->getSettingValue<bool>("pauseLayerShow")) return;
-        if (TagsManager::sharedState()->tags.size() == 0) return;
+        if (TagsManager::sharedState()->tags.size() == 0 || m_fields->levelId == 0) return;
 
         if (TagsManager::sharedState()->cachedTags[std::to_string(m_fields->levelId)].size() != 0) {
             m_fields->tags = TagsManager::sortTags(TagsManager::sharedState()->cachedTags[std::to_string(m_fields->levelId)]);
@@ -26,19 +26,19 @@ class $modify(TagsPauseLayer, PauseLayer) {
             return;
         }
 
-        m_fields->m_listener.bind([this](web::WebTask::Event* e) {
-            if (auto res = e->getValue(); res && res->ok()) {
-                auto jsonStr = res->string().unwrapOr("{}");
+        auto req = geode::utils::web::WebRequest();
+
+        m_fields->m_listener.spawn(
+            req.get(fmt::format("{}/get?id={}", Mod::get()->getSettingValue<std::string>("serverUrl"), m_fields->levelId)),
+            [this](geode::utils::web::WebResponse value) {
+                auto jsonStr = value.string().unwrapOr("{}");
                 auto json = matjson::parse(jsonStr).unwrapOr("{}");
 
                 m_fields->tags = TagsManager::sortTags(json[std::to_string(m_fields->levelId)]);
                 TagsManager::sharedState()->cachedTags[std::to_string(m_fields->levelId)] = json[std::to_string(m_fields->levelId)];
                 updateTags();
             }
-        });
-
-        auto req = web::WebRequest();
-        m_fields->m_listener.setFilter(req.get(fmt::format("{}/get?id={}", Mod::get()->getSettingValue<std::string>("serverUrl"), m_fields->levelId)));
+        );
     }
     void updateTags() {
         CCSize winSize = CCDirector::get()->getWinSize();

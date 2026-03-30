@@ -1,8 +1,7 @@
 #include "credits.hpp"
-#include "Geode/binding/CCMenuItemSpriteExtra.hpp"
-#include "Geode/cocos/cocoa/CCObject.h"
 
-bool CreditsPopup::setup(bool a) {
+bool CreditsPopup::init() {
+    if (!Popup::init(340.f, 220.f, "square.png"_spr)) return false;
     setTitle("Staff");
     m_title->setPositionY(204.f);
 
@@ -13,24 +12,32 @@ bool CreditsPopup::setup(bool a) {
     descMenu->setPosition({m_mainLayer->getContentWidth() / 2, 105});
     m_mainLayer->addChild(descMenu);
 
-    arrowSpr = CCSprite::createWithSpriteFrameName("GJ_arrow_03_001.png");
-    arrowSpr->setFlipX(true);
-
-    auto pageArrow = CCMenuItemSpriteExtra::create(arrowSpr, this, menu_selector(CreditsPopup::switchPage));
-    pageArrow->setPosition(360.f, m_mainLayer->getContentHeight() / 2);
-    m_closeBtn->getParent()->addChild(pageArrow);
-
     auto loading = LoadingSpinner::create(20.f);
     loading->setPosition({m_mainLayer->getContentWidth() / 2, 105});
     m_mainLayer->addChild(loading);
 
-    m_listener.bind([this, loading](web::WebTask::Event* e) {
-        if (auto res = e->getValue(); res && res->ok()) {
-            auto jsonStr = res->string().unwrapOr("{}");
+    auto req = geode::utils::web::WebRequest();
+
+    m_listener.spawn(
+        req.get(fmt::format("{}/credits", Mod::get()->getSettingValue<std::string>("serverUrl"))),
+        [this, loading](geode::utils::web::WebResponse value) {
+            auto jsonStr = value.string().unwrapOr("{}");
             auto json = matjson::parse(jsonStr).unwrapOr("{}");
 
             if (loading) m_mainLayer->removeChild(loading);
-            
+
+            for (int i = 0; i < 3; i++) {
+                CCSprite* dot = CCSprite::createWithSpriteFrameName("gj_navDotBtn_off_001.png");
+                dot->setScale(0.75f);
+                dot->setPosition({m_mainLayer->getContentWidth() / 2 + (i - 1) * 20, 15.f});
+                m_mainLayer->addChild(dot);
+            }
+
+            pageDot = CCSprite::createWithSpriteFrameName("gj_navDotBtn_on_001.png");
+            pageDot->setScale(0.75f);
+            pageDot->setPosition({150.f, 15.f});
+            m_mainLayer->addChild(pageDot);
+
             auto staffMenu = CCMenu::create();
             staffMenu->setPosition({m_mainLayer->getContentWidth() / 2, 180});
             staffMenu->setContentWidth(300);
@@ -38,6 +45,15 @@ bool CreditsPopup::setup(bool a) {
             staffMenu->setLayout(AxisLayout::create()->setGrowCrossAxis(true)->setAutoScale(false)->setGap(5));
             staffMenu->setID("staff-menu");
             m_mainLayer->addChild(staffMenu);
+
+            auto helpersMenu = CCMenu::create();
+            helpersMenu->setPosition({m_mainLayer->getContentWidth() / 2, 180});
+            helpersMenu->setContentWidth(300);
+            helpersMenu->setAnchorPoint({0.5, 1});
+            helpersMenu->setVisible(false);
+            helpersMenu->setLayout(AxisLayout::create()->setGrowCrossAxis(true)->setAutoScale(false)->setGap(5));
+            helpersMenu->setID("helpers-menu");
+            m_mainLayer->addChild(helpersMenu);
 
             auto stMenu = CCMenu::create();
             stMenu->setPosition({m_mainLayer->getContentWidth() / 2, 180});
@@ -47,17 +63,29 @@ bool CreditsPopup::setup(bool a) {
             stMenu->setLayout(AxisLayout::create()->setGrowCrossAxis(true)->setAutoScale(false)->setGap(5));
             stMenu->setID("special-thanks-menu");
             m_mainLayer->addChild(stMenu);
+
+            auto arrowSprRight = CCSprite::createWithSpriteFrameName("GJ_arrow_03_001.png");
+            arrowSprRight->setFlipX(true);
+
+            auto pageArrowRight = CCMenuItemSpriteExtra::create(arrowSprRight, this, menu_selector(CreditsPopup::switchPage));
+            pageArrowRight->setPosition(360.f, m_mainLayer->getContentHeight() / 2);
+            pageArrowRight->setTag(1);
+            m_closeBtn->getParent()->addChild(pageArrowRight);
+
+            auto pageArrowLeft = CCMenuItemSpriteExtra::create(CCSprite::createWithSpriteFrameName("GJ_arrow_03_001.png"), this, menu_selector(CreditsPopup::switchPage));
+            pageArrowLeft->setPosition(-20.f, m_mainLayer->getContentHeight() / 2);
+            pageArrowLeft->setTag(-1);
+            m_closeBtn->getParent()->addChild(pageArrowLeft);
             
             for (const auto& [key, value] : json) {
                 auto role = value[0].asString().unwrapOr("");
                 auto btn = CCMenuItemSpriteExtra::create( tabSprite(key, role), this, menu_selector(CreditsPopup::btn));
                 btn->setID(key);
                 btn->setTag(value[1].asInt().unwrapOr(0));
-                if (role == "developer" || role == "admin" || role == "moderator" || role == "helper") {
-                    staffMenu->addChild(btn);
-                } else {
-                    stMenu->addChild(btn);
-                }
+
+                if (role == "developer" || role == "admin" || role == "moderator") staffMenu->addChild(btn);
+                else if (role == "helper") helpersMenu->addChild(btn);
+                else stMenu->addChild(btn);
             }
         
             auto docs = CCMenuItemSpriteExtra::create( tabSprite("GD Styles List", "Mod Inspiration"), this, menu_selector(CreditsPopup::docs));
@@ -65,12 +93,10 @@ bool CreditsPopup::setup(bool a) {
             stMenu->addChild(docs);
         
             staffMenu->updateLayout();
+            helpersMenu->updateLayout();
             stMenu->updateLayout();
         }
-    });
-
-    auto req = web::WebRequest();
-    m_listener.setFilter(req.get(fmt::format("{}/credits", Mod::get()->getSettingValue<std::string>("serverUrl"))));
+    );
 
     return true;
 }
@@ -101,16 +127,33 @@ CCNode* CreditsPopup::tabSprite(std::string name, std::string role) {
 }
 
 void CreditsPopup::switchPage(CCObject* sender) {
-    arrowSpr->setFlipX(!arrowSpr->isFlipX());
-    if (auto btn = static_cast<CCMenuItemSpriteExtra*>(sender); btn->getPositionX() == 360.f) {
-        btn->setPositionX(-20.f);
-        setTitle("Special Thanks");
+    if (auto btn = static_cast<CCMenuItemSpriteExtra*>(sender); btn->getTag() == 1) {
+        page++;
+        if (page > 2) page = 0;
     } else {
-        btn->setPositionX(360.f);
-        setTitle("Staff");
+        page--;
+        if (page < 0) page = 2;
     }
-    m_mainLayer->getChildByID("staff-menu")->setVisible(!m_mainLayer->getChildByID("staff-menu")->isVisible());
-    m_mainLayer->getChildByID("special-thanks-menu")->setVisible(!m_mainLayer->getChildByID("special-thanks-menu")->isVisible());
+    m_mainLayer->getChildByID("staff-menu")->setVisible(false);
+    m_mainLayer->getChildByID("helpers-menu")->setVisible(false);
+    m_mainLayer->getChildByID("special-thanks-menu")->setVisible(false);
+    switch (page) {
+        case 0:
+            setTitle("Staff");
+            m_mainLayer->getChildByID("staff-menu")->setVisible(true);
+            pageDot->setPosition({150.f, 15.f});
+            break;
+        case 1:
+            setTitle("Helpers");
+            m_mainLayer->getChildByID("helpers-menu")->setVisible(true);
+            pageDot->setPosition({170.f, 15.f});
+            break;
+        case 2:
+            setTitle("Special Thanks");
+            m_mainLayer->getChildByID("special-thanks-menu")->setVisible(true);
+            pageDot->setPosition({190.f, 15.f});
+            break;
+    }
 }
 
 void CreditsPopup::btn(CCObject* sender) {
@@ -121,12 +164,12 @@ void CreditsPopup::docs(CCObject* sender) {
     web::openLinkInBrowser("https://x.com/stylesofgd");
 }
 
-CreditsPopup* CreditsPopup::create(bool a) {
-    auto ret = new CreditsPopup();
-    if (ret->initAnchored(340.f, 220.f, a, "square.png"_spr)) {
-        ret->autorelease();
-        return ret;
+CreditsPopup* CreditsPopup::create() {
+    auto popup = new CreditsPopup;
+    if (popup->init()) {
+        popup->autorelease();
+        return popup;
     }
-    delete ret;
+    delete popup;
     return nullptr;
 }

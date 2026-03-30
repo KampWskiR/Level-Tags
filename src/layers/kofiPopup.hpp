@@ -8,10 +8,10 @@
 
 using namespace geode::prelude;
 
-class KofiPopup : public geode::Popup<bool> {
+class KofiPopup : public Popup {
 protected:
-    bool setup(bool a);
+    bool init();
     void open(CCObject*);
 public:
-    static KofiPopup* create(bool a);
+    static KofiPopup* create();
 };

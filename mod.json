@@ -1,12 +1,12 @@
 {
-	"geode": "4.9.0",
+	"geode": "5.4.1",
 	"gd": {
-		"win": "2.2074",
-		"mac": "2.2074",
-		"android": "2.2074",
-		"ios": "2.2074"
+		"win": "2.2081",
+		"mac": "2.2081",
+		"android": "2.2081",
+		"ios": "2.2081"
 	},
-	"version": "v0.3.3-alpha",
+	"version": "v0.4.0-alpha",
 	"id": "kampwski.level_tags",
 	"name": "Level Tags",
 	"developer": "KampWski",
@@ -17,7 +17,7 @@
 			"importance": "required"
 		},
 		"alphalaneous.happy_textures": {
-			"version": ">=v2.0.6",
+			"version": ">=v2.1.6",
 			"importance": "required"
 		}
 	},

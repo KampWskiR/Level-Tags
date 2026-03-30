@@ -8,16 +8,18 @@
 
 using namespace geode::prelude;
 
-class CreditsPopup : public geode::Popup<bool> {
+class CreditsPopup : public Popup {
 protected:
-    EventListener<web::WebTask> m_listener;
+    async::TaskHolder<geode::utils::web::WebResponse> m_listener;
     CCSprite* arrowSpr;
+    CCSprite* pageDot;
+    int page = 0;
 
-    bool setup(bool a);
+    bool init();
     CCNode* tabSprite(std::string name, std::string role);
     void switchPage(CCObject* sender);
     void btn(CCObject* sender);
     void docs(CCObject* sender);
 public:
-    static CreditsPopup* create(bool a);
+    static CreditsPopup* create();
 };

@@ -15,7 +15,7 @@ public:
     inline static matjson::Value tags;
     inline static matjson::Value searchResult;
     inline static std::vector<GJGameLevel*> searchLevels;
-    inline static EventListener<web::WebTask> m_listener;
+    inline static async::TaskHolder<geode::utils::web::WebResponse> m_listener;
     
     static TagsManager* sharedState();
     static matjson::Value sortTags(matjson::Value tags);

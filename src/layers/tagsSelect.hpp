@@ -9,7 +9,7 @@ class TagsSearch;
 
 using namespace geode::prelude;
 
-class TagsSelect : public geode::Popup<TagsSearch*>, public TextInputDelegate {
+class TagsSelect : public Popup, public TextInputDelegate {
 protected:
     TagsSearch* m_search;
     std::vector<std::string> tagMenu;
@@ -20,7 +20,7 @@ protected:
     CCMenu* menuGameplay;
     bool tagInfoSelected = false;
     int tagZ = 0;
-    bool setup(TagsSearch* search) override;
+    bool init(TagsSearch* search);
     CCMenu* createMenu(std::string name);
     void category(CCObject* sender);
     void onTag(CCObject* sender);

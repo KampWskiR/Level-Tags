@@ -1,8 +1,7 @@
 #include "kofiPopup.hpp"
-#include "Geode/cocos/actions/CCActionInterval.h"
-#include "ccTypes.h"
 
-bool KofiPopup::setup(bool a) {
+bool KofiPopup::init() {
+    if (!Popup::init(280.f, 160.f, "square.png"_spr)) return false;
     setTitle("Support us on kofi!");
     m_title->setScale(0.75f);
 
@@ -24,8 +23,8 @@ bool KofiPopup::setup(bool a) {
     auto perks = CCLabelBMFont::create(
         "- Request Priority.\n"
         "- Early Access to the mod updates.\n"
-        "- A Supporter Discord role\n  with access to the staff channel.\n"
-        "- A mention in the Explore page.", "chatFont.fnt"
+        "- A Supporter Discord role\n"
+        "- A mention in the Credits page.", "chatFont.fnt"
     );
     perks->setPosition({m_mainLayer->getContentWidth() / 2, 72.f});
     perks->setScale(0.7f);
@@ -77,12 +76,12 @@ void KofiPopup::open(CCObject*) {
     onClose(this);
 }
 
-KofiPopup* KofiPopup::create(bool a) {
-    auto ret = new KofiPopup();
-    if (ret->initAnchored(280.f, 160.f, a, "square.png"_spr)) {
-        ret->autorelease();
-        return ret;
+KofiPopup* KofiPopup::create() {
+    auto popup = new KofiPopup;
+    if (popup->init()) {
+        popup->autorelease();
+        return popup;
     }
-    delete ret;
+    delete popup;
     return nullptr;
 }

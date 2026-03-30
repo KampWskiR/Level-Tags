@@ -8,9 +8,9 @@
 
 using namespace geode::prelude;
 
-class MoreTags : public geode::Popup<matjson::Value> {
+class MoreTags : public Popup {
 protected:
-    bool setup(matjson::Value tags);
+    bool init(matjson::Value tags);
 public:
     static MoreTags* create(matjson::Value tags);
 };

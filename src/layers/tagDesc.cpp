@@ -1,6 +1,7 @@
 #include "tagDesc.hpp"
 
-bool TagDesc::setup(std::string tag) {
+bool TagDesc::init(std::string tag) {
+    if (!Popup::init(305.f, 120.f, "square.png"_spr)) return false;
     matjson::Value tagObject = TagsManager::sharedState()->getTagObject(tag)[tag];
     ccColor3B color = tagObject[1].as<ccColor3B>().unwrapOr(ccColor3B{ 0, 0, 0 });
     std::string description = tagObject[2].as<std::string>().unwrapOr("no description provided");
@@ -54,12 +55,12 @@ bool TagDesc::setup(std::string tag) {
 }
 
 TagDesc* TagDesc::create(std::string tag) {
-    auto ret = new TagDesc();
-    if (ret->initAnchored(305.f, 120.f, tag, "square.png"_spr)) {
-        ret->autorelease();
-        return ret;
+    auto popup = new TagDesc;
+    if (popup->init(tag)) {
+        popup->autorelease();
+        return popup;
     }
-    delete ret;
+    delete popup;
     return nullptr;
 }
 

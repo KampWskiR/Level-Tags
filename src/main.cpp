@@ -6,14 +6,13 @@
 #include <Geode/ui/GeodeUI.hpp>
 
 #include "hooks/levelInfoLayer.cpp"
-//#include "layers/betaSearch.hpp"
 #include "layers/tagsSearch.hpp"
 #include "tagsManager.hpp"
 
 using namespace geode::prelude;
 
 class $modify(TagsMenuLayer, MenuLayer) {
-    struct Fields {EventListener<web::WebTask> m_listener;};
+    struct Fields {async::TaskHolder<geode::utils::web::WebResponse> m_listener;};
     $override
     bool init() {
         if (!MenuLayer::init()) return false;
@@ -39,8 +38,8 @@ class $modify(TagsLevelSearchLayer, LevelSearchLayer) {
 
         return true;
     };
+
     void menu(CCObject* sender) {
-        //BetaSearch::create("")->show();
-        CCDirector::sharedDirector()->pushScene(TagsSearch::scene());
+        CCDirector::sharedDirector()->pushScene(CCTransitionFade::create(0.5f, TagsSearch::scene()));
     }
 };

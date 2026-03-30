@@ -8,10 +8,10 @@
 
 using namespace geode::prelude;
 
-class DiscordPopup : public geode::Popup<bool> {
+class DiscordPopup : public Popup {
 protected:
-    bool setup(bool a);
+    bool init();
     void join(CCObject*);
 public:
-    static DiscordPopup* create(bool a);
+    static DiscordPopup* create();
 };

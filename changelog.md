@@ -1,9 +1,12 @@
 # v0.4.0-alpha
-- UI Redesign
-- Github is no longer used for storing data and it was switched to a server
-- Tags are now fetched from LevelBrowserLayer instead of LevelCell
-- Added a "server" option in settings
-- Added new options to hide specific tag categories
+- UI Redesign.
+- Search Tab Redesign.
+- Github is no longer used for storing data.
+- Tags are now fetched from LevelBrowserLayer instead of LevelCell.
+- Added a "server" option in the settings.
+- Added new options to hide specific tag categories.
+- Added version filter in the search.
+- Added search for tags selection.
 
 # v0.3.3-alpha
 - Minor rework of the tags system

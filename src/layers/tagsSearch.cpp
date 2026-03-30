@@ -1,9 +1,4 @@
 #include "tagsSearch.hpp"
-#include "Geode/cocos/menu_nodes/CCMenuItem.h"
-#include "Geode/cocos/sprite_nodes/CCSprite.h"
-#include "Geode/ui/BasedButtonSprite.hpp"
-#include "Geode/ui/GeodeUI.hpp"
-#include "uiSquare.hpp"
 
 bool TagsSearch::init() {
     if(!CCLayer::init()) return false;
@@ -44,12 +39,12 @@ bool TagsSearch::init() {
     auto bottom = CCSprite::create("searchTop.png"_spr);
     bottom->setFlipY(true);
     bottom->setAnchorPoint({ 0.5f, 0.f });
-    bottom->setPosition({ getContentWidth() / 2, 0.f });
+    bottom->setPosition({ getContentWidth() / 2, -15.f });
     addChild(bottom);
 
     // bottom menu
     auto bottomMenu = CCMenu::create();
-    bottomMenu->setPosition({ getContentWidth() / 2, 45.f });
+    bottomMenu->setPosition({ getContentWidth() / 2, 30.f });
     bottomMenu->setContentSize({ 200.f, 50.f });
     bottomMenu->setLayout(AxisLayout::create()->setGap(10.f)->setAxis(Axis::Row)->setAxisReverse(false));
     addChild(bottomMenu);
@@ -63,9 +58,9 @@ bool TagsSearch::init() {
 
     auto searchSpr = CircleButtonSprite::createWithSprite("search2.png"_spr, 1.f, CircleBaseColor::DarkPurple); 
 
-    auto search = CCMenuItemSpriteExtra::create(searchSpr, this, menu_selector(TagsSearch::search));
-    search->setID("search");
-    bottomMenu->addChild(search);
+    searchBtn = CCMenuItemSpriteExtra::create(searchSpr, this, menu_selector(TagsSearch::search));
+    searchBtn->setID("search-btn");
+    bottomMenu->addChild(searchBtn);
 
     auto creditsSpr = CircleButtonSprite::createWithSprite("creditss.png"_spr, 1.f, CircleBaseColor::DarkPurple);
     creditsSpr->setScale(0.75f);
@@ -236,6 +231,8 @@ bool TagsSearch::init() {
     updateTags(true, std::vector<std::string>());
     updateTags(false, std::vector<std::string>());
 
+    setKeyboardEnabled(true);
+
     return true;
 }
 
@@ -262,7 +259,7 @@ void TagsSearch::versionChange(CCObject* sender) {
 };
 
 void TagsSearch::credits(CCObject*) {
-    CreditsPopup::create(true)->show();
+    CreditsPopup::create()->show();
 }
 
 void TagsSearch::settings(CCObject*) {
@@ -270,7 +267,7 @@ void TagsSearch::settings(CCObject*) {
 }
 
 void TagsSearch::kofi(CCObject*) {
-    KofiPopup::create(true)->show();
+    KofiPopup::create()->show();
 }
 
 void TagsSearch::onTags(CCObject* sender) {
@@ -310,18 +307,38 @@ void TagsSearch::updateTags(bool include, std::vector<std::string> tags) {
     }
 }
 
-void TagsSearch::search(CCObject* sender) {
-    auto btn = static_cast<CCMenuItemSpriteExtra*>(sender);
-
+void TagsSearch::search(CCObject*) {
     auto loading = LoadingSpinner::create(20);
-    loading->setPosition(btn->getPosition());
-    btn->getParent()->addChild(loading, 999);
-    btn->setEnabled(false);
-    static_cast<CircleButtonSprite*>(btn->getChildren()->objectAtIndex(0))->setColor({50, 50, 50});
+    loading->setPosition(searchBtn->getPosition());
+    searchBtn->getParent()->addChild(loading, 999);
+    searchBtn->setEnabled(false);
+    static_cast<CircleButtonSprite*>(searchBtn->getChildren()->objectAtIndex(0))->setColor({50, 50, 50});
 
-    m_listener.bind([this, loading, btn](web::WebTask::Event* e) {
-        if (auto res = e->getValue(); res && res->ok()) {
-            auto jsonStr = res->string().unwrapOr("{}");
+    std::string includeStr, excludeStr;
+    for (size_t i = 0; i < includeTags.size(); ++i) {
+        includeStr += includeTags[i];
+        if (i != includeTags.size() - 1) includeStr += ",";
+    }
+    for (size_t i = 0; i < excludeTags.size(); ++i) {
+        excludeStr += excludeTags[i];
+        if (i != excludeTags.size() - 1) excludeStr += ",";
+    }
+    std::string queryStr;
+    if (!includeStr.empty()) queryStr += "?i=" + includeStr;
+    if (!excludeStr.empty()) {
+        if (!queryStr.empty()) {
+            queryStr += "&e=" + excludeStr;
+        } else {
+            queryStr += "?e=" + excludeStr;
+        }
+    }
+
+    auto req = geode::utils::web::WebRequest();
+
+    m_listener.spawn(
+        req.get(fmt::format("{}/search{}", Mod::get()->getSettingValue<std::string>("serverUrl"), queryStr)),
+        [this, loading](geode::utils::web::WebResponse value) {
+            auto jsonStr = value.string().unwrapOr("{}");
             auto json = matjson::parse(jsonStr).unwrapOr("{}");
             std::vector<int> levels;
 
@@ -388,37 +405,11 @@ void TagsSearch::search(CCObject* sender) {
                     );
                 }
                 loading->removeFromParent();
-                btn->setEnabled(true);
-                static_cast<CircleButtonSprite*>(btn->getChildren()->objectAtIndex(0))->setColor({255, 255, 255});
+                searchBtn->setEnabled(true);
+                static_cast<CircleButtonSprite*>(searchBtn->getChildren()->objectAtIndex(0))->setColor({255, 255, 255});
             }
         }
-    });
-
-    auto req = web::WebRequest();
-    std::string includeStr, excludeStr;
-    for (size_t i = 0; i < includeTags.size(); ++i) {
-        includeStr += includeTags[i];
-        if (i != includeTags.size() - 1) includeStr += ",";
-    }
-    for (size_t i = 0; i < excludeTags.size(); ++i) {
-        excludeStr += excludeTags[i];
-        if (i != excludeTags.size() - 1) excludeStr += ",";
-    }
-    std::string queryStr;
-    if (!includeStr.empty()) queryStr += "?i=" + includeStr;
-    if (!excludeStr.empty()) {
-        if (!queryStr.empty()) {
-            queryStr += "&e=" + excludeStr;
-        } else {
-            queryStr += "?e=" + excludeStr;
-        }
-    }
-    m_listener.setFilter(req.get(fmt::format("{}/search{}", Mod::get()->getSettingValue<std::string>("serverUrl"), queryStr)));
-}
-
-void TagsSearch::onBack(cocos2d::CCObject* sender) {
-    auto director = CCDirector::get();
-    director->popSceneWithTransition(0.5f, PopTransition::kPopTransitionFade);
+    );
 }
 
 CCScene* TagsSearch::scene() {
@@ -437,4 +428,16 @@ TagsSearch* TagsSearch::create() {
     }
     delete ret;
     return nullptr;
+}
+
+void TagsSearch::keyDown(cocos2d::enumKeyCodes key, double timestamp) {
+    log::info("a");
+    if (key == cocos2d::enumKeyCodes::KEY_Escape) this->onBack(nullptr);
+    else if (key == cocos2d::enumKeyCodes::KEY_Enter) this->search(nullptr);
+    CCLayer::keyDown(key, 0.0);
+}
+
+void TagsSearch::onBack(CCObject*) {
+    auto director = CCDirector::get();
+    director->popSceneWithTransition(0.5f, PopTransition::kPopTransitionFade);
 }
