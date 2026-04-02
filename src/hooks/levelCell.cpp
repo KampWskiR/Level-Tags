@@ -18,7 +18,7 @@ void TagsLevelCell::adjustPositions() {
     adjustY({"length-icon", "length-label", "downloads-icon", "downloads-label", "likes-icon", "likes-label", "orbs-icon", "orbs-label"}, m_compactView ? 6 : 10);
     if (m_compactView) adjustY({"coin-icon-1", "coin-icon-2", "coin-icon-3"}, 26.5);
     if (auto creatorName = m_mainLayer->getChildByID("main-menu")->getChildByID("creator-name"))
-        creatorName->setPositionY(creatorName->getPositionY() + (m_compactView ? 0.5f : 3.5f));
+        creatorName->setPositionY(creatorName->getPositionY() + (m_compactView ? 0 : 4));
 };
 
 void TagsLevelCell::loadCustomLevelCell() {

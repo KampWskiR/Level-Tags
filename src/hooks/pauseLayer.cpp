@@ -45,7 +45,7 @@ class $modify(TagsPauseLayer, PauseLayer) {
 
         auto tagMenu = CCMenu::create();
         tagMenu->setLayout(RowLayout::create()->setAutoScale(false)->setGap(2)->setAxisAlignment(AxisAlignment::Center));
-        tagMenu->setPosition({winSize.width / 2, 310});
+        tagMenu->setPosition({winSize.width / 2, winSize.height - 8});
         tagMenu->setID("level-tags");
         this->addChild(tagMenu);
 

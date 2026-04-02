@@ -431,7 +431,6 @@ TagsSearch* TagsSearch::create() {
 }
 
 void TagsSearch::keyDown(cocos2d::enumKeyCodes key, double timestamp) {
-    log::info("a");
     if (key == cocos2d::enumKeyCodes::KEY_Escape) this->onBack(nullptr);
     else if (key == cocos2d::enumKeyCodes::KEY_Enter) this->search(nullptr);
     CCLayer::keyDown(key, 0.0);
