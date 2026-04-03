@@ -95,12 +95,14 @@ CCClippingNode *TagsManager::addBgAnim(CCSize size) {
     bgTexture->setOpacity(25);
 
     clipper->addChild(bgTexture);
-
-    auto bgMove = CCMoveBy::create(10.0f, {272.f, -277.f});
-    auto bgReset = CCMoveTo::create(0.0f, {0.f, 0.f});
-    auto bgSeq = CCSequence::create(bgMove, bgReset, nullptr);
-    auto bgRepeat = CCRepeatForever::create(bgSeq);
-    bgTexture->runAction(bgRepeat);
+    
+    if (Mod::get()->getSettingValue<bool>("bganim")) {
+        auto bgMove = CCMoveBy::create(10.0f, {272.f, -277.f});
+        auto bgReset = CCMoveTo::create(0.0f, {0.f, 0.f});
+        auto bgSeq = CCSequence::create(bgMove, bgReset, nullptr);
+        auto bgRepeat = CCRepeatForever::create(bgSeq);
+        bgTexture->runAction(bgRepeat);
+    };
 
     return clipper;
 }

@@ -90,6 +90,12 @@
 			"type": "bool",
 			"default": false
 		},
+		"bganim": {
+			"name": "Background Animation",
+			"description": "When turned off, stops the tags background animation.",
+			"type": "bool",
+			"default": true
+		},
 		"other": {
             "name": "Other",
             "type": "title"
