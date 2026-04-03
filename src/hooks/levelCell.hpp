@@ -15,6 +15,7 @@ class $modify(TagsLevelCell, LevelCell) {
         async::TaskHolder<geode::utils::web::WebResponse> m_listener;
         matjson::Value tags;
         bool extended = false;
+        float creatorNameY;
     };
     
     void adjustY(const std::vector<std::string>& elements, float y);

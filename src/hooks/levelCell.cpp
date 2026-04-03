@@ -18,11 +18,13 @@ void TagsLevelCell::adjustPositions() {
     adjustY({"length-icon", "length-label", "downloads-icon", "downloads-label", "likes-icon", "likes-label", "orbs-icon", "orbs-label"}, m_compactView ? 6 : 10);
     if (m_compactView) adjustY({"coin-icon-1", "coin-icon-2", "coin-icon-3"}, 26.5);
     if (auto creatorName = m_mainLayer->getChildByID("main-menu")->getChildByID("creator-name"))
-        creatorName->setPositionY(creatorName->getPositionY() + (m_compactView ? 0 : 4));
+        creatorName->setPositionY(m_fields->creatorNameY + (m_compactView ? 0 : 4));
 };
 
 void TagsLevelCell::loadCustomLevelCell() {
     LevelCell::loadCustomLevelCell();
+
+    if (auto creatorName = m_mainLayer->getChildByID("main-menu")->getChildByID("creator-name")) m_fields->creatorNameY = creatorName->getPositionY();
 
     if (TagsManager::sharedState()->tags.size() == 0 || !m_level || !m_level->m_levelID) return;
 

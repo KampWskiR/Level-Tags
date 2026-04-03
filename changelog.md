@@ -1,3 +1,6 @@
+# v0.4.0-alpha.2
+- Fixed creator name sometimes being in the wrong place.
+
 # v0.4.0-alpha
 - UI Redesign.
 - Search Tab Redesign.
