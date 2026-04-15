@@ -324,12 +324,12 @@ void TagsSearch::search(CCObject*) {
         if (i != excludeTags.size() - 1) excludeStr += ",";
     }
     std::string queryStr;
-    if (!includeStr.empty()) queryStr += "?i=" + includeStr;
+    if (!includeStr.empty()) queryStr += "?i=" + TagsManager::urlEncode(includeStr);
     if (!excludeStr.empty()) {
         if (!queryStr.empty()) {
-            queryStr += "&e=" + excludeStr;
+            queryStr += "&e=" + TagsManager::urlEncode(excludeStr);
         } else {
-            queryStr += "?e=" + excludeStr;
+            queryStr += "?e=" + TagsManager::urlEncode(excludeStr);
         }
     }
 

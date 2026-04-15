@@ -1,3 +1,7 @@
+# v0.4.1-alpha
+- Added the "Background Animation" option in the settings.
+- Multi word tags works now in the search.
+
 # v0.4.0-alpha.2
 - Fixed creator name sometimes being in the wrong place.
 

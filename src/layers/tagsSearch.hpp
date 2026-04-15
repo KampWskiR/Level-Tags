@@ -35,6 +35,11 @@ public:
     virtual bool init();
     void sortChange(CCObject* sender);
     void versionChange(CCObject* sender);
+    // void createInclude(CCPoint pos);
+    // void createExclude(CCPoint pos);
+    // void createSort(CCPoint pos);
+    // void createVersion(CCPoint pos);
+    // void createDifficulty(CCPoint pos);
     void credits(CCObject*);
     void settings(CCObject*);
     void kofi(CCObject*);

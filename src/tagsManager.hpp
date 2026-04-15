@@ -26,4 +26,5 @@ public:
     static CCClippingNode* addBgAnim(CCSize size);
     static CCLayer* addCorners(CCSize size, float scale);
     static void loadTagsInfo();
+    static std::string urlEncode(std::string value);
 };

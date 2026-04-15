@@ -134,3 +134,18 @@ void TagsManager::loadTagsInfo() {
         }
     );
 }
+
+std::string TagsManager::urlEncode(std::string str) {
+    std::ostringstream encodedStream;
+    encodedStream << std::hex << std::uppercase << std::setfill('0');
+
+    for (char c : str) {
+        if (std::isalnum(c) || c == '-' || c == '_' || c == '.' || c == '~') {
+            encodedStream << c;
+        } else {
+            encodedStream << '%' << std::setw(2) << static_cast<unsigned int>(static_cast<unsigned char>(c));
+        }
+    }
+
+    return encodedStream.str();
+}
