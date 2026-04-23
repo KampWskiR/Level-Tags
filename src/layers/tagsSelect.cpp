@@ -21,32 +21,7 @@ bool TagsSelect::init(TagsSearch* search) {
     m_closeBtn->setSprite(closeSpr);
     m_closeBtn->setPosition({m_mainLayer->getContentWidth() / 2, 23});
 
-    auto stencil = CCLayerColor::create(ccc4(0, 0, 0, 255), m_mainLayer->getContentWidth(), m_mainLayer->getContentHeight());
-    stencil->setAnchorPoint({0, 0});
-    stencil->setPosition({0, 0});
-
-    auto clipper = CCClippingNode::create(stencil);
-    clipper->setAnchorPoint({0.5f, 0.5f});
-    clipper->setPosition({0, 0});
-
-    auto texture = CCTextureCache::sharedTextureCache()->addImage("tagsBG.png"_spr, false);
-    ccTexParams texParams = { GL_LINEAR, GL_LINEAR, GL_REPEAT, GL_REPEAT };
-    texture->setTexParameters(&texParams);
-
-    auto bgTexture = CCSprite::createWithTexture(texture, CCRectMake(0, 0, texture->m_uPixelsWide * 2, texture->m_uPixelsHigh * 2));
-    bgTexture->setAnchorPoint(ccp(0.5f, 0.5f));
-    bgTexture->setPosition({0.f, 0.f});
-    bgTexture->setOpacity(25);
-
-    clipper->addChild(bgTexture);
-
-    m_mainLayer->addChild(clipper);
-
-    auto bgMove = CCMoveBy::create(10.0f, {272.f, -277.f});
-    auto bgReset = CCMoveTo::create(0.0f, {0.f, 0.f});
-    auto bgSeq = CCSequence::create(bgMove, bgReset, nullptr);
-    auto bgRepeat = CCRepeatForever::create(bgSeq);
-    bgTexture->runAction(bgRepeat);
+    m_mainLayer->addChild(TagsManager::sharedState()->addBgAnim(m_size));
 
     for (int i = 0; i < 4; ++i) {
         auto corner = CCSprite::create("corner.png"_spr);
