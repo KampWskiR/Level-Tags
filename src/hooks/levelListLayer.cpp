@@ -14,17 +14,19 @@ class $modify(TagsLevelListLayer, LevelListLayer) {
 
     $override
     void loadLevelsFinished(CCArray* p0, char const* p1, int p2) {
+        LevelListLayer::loadLevelsFinished(p0, p1, p2);
+        if (m_searchObject->m_searchType == SearchType::MyLevels || !p0 || p0->count() == 0) return;
+
         std::vector<int> levelIds;
 
-        CCObject* obj;
-        for (auto obj : CCArrayExt(p0)) {
-            if (auto level = static_cast<GJGameLevel*>(obj)) levelIds.push_back(level->m_levelID.value());
+        for (auto level : CCArrayExt<GJGameLevel*>(p0)) {
+            if (!geode::cast::typeinfo_cast<GJGameLevel*>(level)) return;
+            levelIds.push_back(level->m_levelID.value());
         }
 
         if (std::all_of(levelIds.begin(), levelIds.end(), [](int id) {
             return TagsManager::sharedState()->cachedTags[std::to_string(id)].size() != 0;
         })) {
-            LevelBrowserLayer::loadLevelsFinished(p0, p1, p2);
             return;
         }
 
@@ -60,12 +62,6 @@ class $modify(TagsLevelListLayer, LevelListLayer) {
             }
         );
 
-        LevelBrowserLayer::loadLevelsFinished(p0, p1, p2);
+        LevelListLayer::loadLevelsFinished(p0, p1, p2);
     }
-
-    bool init(GJSearchObject* p0) {
-        if (!LevelBrowserLayer::init(p0)) return false;
-
-        return true;
-    };
 };
