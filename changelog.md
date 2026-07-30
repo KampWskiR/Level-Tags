@@ -1,3 +1,7 @@
+# v0.4.2-alpha
+- Removed Happy Textures from dependencies.
+- Fixed List refresh crash.
+
 # v0.4.1-alpha
 - Added the "Background Animation" option in the settings.
 - Multi word tags works now in the search.

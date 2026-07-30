@@ -118,7 +118,7 @@ bool TagsSelect::init(TagsSearch* search) {
 
     menuGameplay = createMenu("gameplay");
     menuGameplay->setContentWidth(440);
-    menuGameplay->setScale(0.85);
+    menuGameplay->setScale(0.8);
     m_mainLayer->addChild(menuGameplay);
 
     auto json = TagsManager::sharedState()->tags;

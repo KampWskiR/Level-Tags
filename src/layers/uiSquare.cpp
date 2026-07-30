@@ -13,7 +13,7 @@ bool UIsquare::init(bool primary, CCSize size) {
     m_gradient->setVector({0, 1});
     addChild(m_gradient);
 
-    m_bg = CCScale9Sprite::create("square07white.png"_spr);
+    m_bg = geode::NineSlice::create("square07white.png"_spr);
     m_bg->setColor(primary ? ccc3(255, 222, 89) : ccc3(255, 63, 121));
     m_bg->setPosition(size.width / 2, size.height / 2);
     m_bg->setContentSize(size);

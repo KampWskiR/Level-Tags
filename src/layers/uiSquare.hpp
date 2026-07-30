@@ -8,7 +8,7 @@ class UIsquare : public CCLayer {
 protected:
 	bool init(bool primary, CCSize size);
 public:
-    CCScale9Sprite* m_bg;
+    geode::NineSlice* m_bg;
     CCLayerGradient* m_gradient;
 	static UIsquare* create(bool primary, CCSize size);
 };
